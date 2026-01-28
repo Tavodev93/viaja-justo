@@ -1,6 +1,7 @@
 "use client";
 
 import { useAccess } from "../hooks/useAccess";
+import { redirectToWompi } from "../lib/wompiRedirect";
 
 export default function PreciosComunesClient() {
   console.log("SOY PRECIOS COMUNES CLIENT");
@@ -64,9 +65,7 @@ export default function PreciosComunesClient() {
           {!hasAccess ? (
             <>
               <button
-                onClick={() => {
-                  window.location.href = "/pago-exitoso";
-                }}
+                onClick={redirectToWompi}
                 className="w-full bg-yellow-400 text-black font-semibold py-4 rounded-lg text-lg hover:bg-yellow-300 transition"
               >
                 Pagar $5.000 y desbloquear precios por 24 horas
