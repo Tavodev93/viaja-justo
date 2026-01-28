@@ -65,7 +65,7 @@ export default function PreciosComunesClient() {
             <>
               <button
                 onClick={() => {
-                  alert("Aquí irá el pago (Wompi se conecta después)");
+                  window.location.href = "/pago-exitoso";
                 }}
                 className="w-full bg-yellow-400 text-black font-semibold py-4 rounded-lg text-lg hover:bg-yellow-300 transition"
               >
