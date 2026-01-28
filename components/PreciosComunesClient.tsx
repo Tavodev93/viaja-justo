@@ -64,24 +64,27 @@ export default function PreciosComunesClient() {
           {!hasAccess ? (
             <>
               <button
-                onClick={() => {
-                  const publicKey = process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY;
+                onClick={async () => {
+                  try {
+                    const res = await fetch("/api/wompi/create-payment", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                    });
 
-                  if (!publicKey) {
-                    alert("Error: Wompi public key no encontrada");
-                    return;
+                    const data = await res.json();
+
+                    if (!data.checkoutUrl) {
+                      alert("Error creando el pago");
+                      return;
+                    }
+
+                    window.location.href = data.checkoutUrl;
+                  } catch (err) {
+                    console.error(err);
+                    alert("Error conectando con el servidor");
                   }
-
-                  const url =
-                    "https://checkout.wompi.co/p/?" +
-                    "public-key=" +
-                    publicKey +
-                    "&currency=COP" +
-                    "&amount-in-cents=500000" +
-                    "&reference=viaja-justo-24h" +
-                    "&redirect-url=https://viaja-justo.vercel.app/pago-exitoso";
-
-                  window.location.href = url;
                 }}
                 className="w-full bg-yellow-400 text-black font-semibold py-4 rounded-lg text-lg hover:bg-yellow-300 transition"
               >
