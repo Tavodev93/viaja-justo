@@ -1,7 +1,6 @@
 "use client";
 
 import { useAccess } from "../hooks/useAccess";
-import { openWompiCheckout } from "../lib/wompi";
 
 export default function PreciosComunesClient() {
   console.log("WOMPI KEY:", process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY);
@@ -65,7 +64,25 @@ export default function PreciosComunesClient() {
           {!hasAccess ? (
             <>
               <button
-                onClick={openWompiCheckout}
+                onClick={() => {
+                  const publicKey = process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY;
+
+                  if (!publicKey) {
+                    alert("Error: Wompi public key no encontrada");
+                    return;
+                  }
+
+                  const url =
+                    "https://checkout.wompi.co/p/?" +
+                    "public-key=" +
+                    publicKey +
+                    "&currency=COP" +
+                    "&amount-in-cents=500000" +
+                    "&reference=viaja-justo-24h" +
+                    "&redirect-url=https://viaja-justo.vercel.app/pago-exitoso";
+
+                  window.location.href = url;
+                }}
                 className="w-full bg-yellow-400 text-black font-semibold py-4 rounded-lg text-lg hover:bg-yellow-300 transition"
               >
                 Pagar $5.000 y desbloquear precios por 24 horas

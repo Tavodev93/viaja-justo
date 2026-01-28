@@ -1,5 +1,4 @@
 import "./globals.css";
-import Script from "next/script";
 
 export default function RootLayout({
   children,
@@ -10,12 +9,6 @@ export default function RootLayout({
     <html lang="es">
       <body>
         {children}
-
-        {/* SCRIPT DE WOMPI */}
-        <Script
-          src="https://checkout.wompi.co/widget.js"
-          strategy="afterInteractive"
-        />
       </body>
     </html>
   );
