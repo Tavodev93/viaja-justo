@@ -4,7 +4,10 @@ import { useAccess } from "../hooks/useAccess";
 import { redirectToWompi } from "../lib/wompiRedirect";
 
 export default function PreciosComunesClient() {
-  console.log("SOY PRECIOS COMUNES CLIENT");
+  console.log(
+    "WOMPI KEY:",
+    process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY
+  );
   const { hasAccess } = useAccess();
 
   return (
