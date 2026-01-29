@@ -5,7 +5,6 @@ import crypto from "crypto";
 
 export async function POST(request: Request) {
   try {
-    // 1️⃣ Leer body
     const body = await request.json();
 
     const amount_in_cents: number = body.amount_in_cents;
@@ -18,7 +17,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2️⃣ Variables fijas
     const currency = "COP";
 
     const integrityKey = process.env.WOMPI_INTEGRITY_KEY;
@@ -31,7 +29,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3️⃣ Firma
+    // 🔐 Firma
     const stringToSign =
       reference + amount_in_cents + currency + integrityKey;
 
@@ -40,7 +38,7 @@ export async function POST(request: Request) {
       .update(stringToSign)
       .digest("hex");
 
-    // 4️⃣ Crear payment link (SANDBOX)
+    // 💳 Crear Payment Link (SANDBOX)
     const wompiResponse = await fetch(
       "https://sandbox.wompi.co/v1/payment_links",
       {
@@ -53,6 +51,7 @@ export async function POST(request: Request) {
           name: "Viaja Justo Acceso",
           description: "Pago unico Viaja Justo",
           single_use: true,
+          collect_shipping: false, // ✅ CLAVE DEL ERROR
           amount_in_cents,
           currency,
           reference,
@@ -69,7 +68,6 @@ export async function POST(request: Request) {
       return NextResponse.json(data, { status: wompiResponse.status });
     }
 
-    // 5️⃣ OK
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.error("SERVER ERROR:", error);
