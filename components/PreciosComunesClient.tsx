@@ -33,6 +33,11 @@ export default function ClientePreciosComunes() {
         return;
       }
 
+      console.log("Respuesta completa:", data);
+console.log("data.data:", data?.data);
+console.log("payment_link:", data?.data?.payment_link);
+
+
       window.location.href = data.data.payment_link;
     } catch (error) {
       console.error("FRONTEND ERROR:", error);
