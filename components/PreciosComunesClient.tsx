@@ -14,15 +14,25 @@ export default function ClientePreciosComunes() {
         }),
       });
 
-      const data = await response.json();
+      const text = await response.text();
+      console.log("RAW RESPONSE:", text);
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        console.error("Respuesta no es JSON");
+        return;
+      }
+
+      console.log("STATUS:", response.status);
+      console.log("RESPONSE DATA:", data);
 
       if (!response.ok) {
-        console.error("ERROR:", data);
         alert("Error creando el pago");
         return;
       }
 
-      // 🔥 REDIRECCIÓN AL CHECKOUT WOMPI
       window.location.href = data.data.payment_link;
     } catch (error) {
       console.error("FRONTEND ERROR:", error);
@@ -42,7 +52,6 @@ export default function ClientePreciosComunes() {
           border: "none",
           borderRadius: "6px",
           cursor: "pointer",
-          fontSize: "16px",
         }}
       >
         Pagar $5.000

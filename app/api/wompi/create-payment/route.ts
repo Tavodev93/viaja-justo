@@ -8,13 +8,6 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { amount_in_cents, reference } = body;
 
-    if (!amount_in_cents || !reference) {
-      return NextResponse.json(
-        { error: "amount_in_cents and reference are required" },
-        { status: 400 }
-      );
-    }
-
     const currency = "COP";
     const integrityKey = process.env.WOMPI_INTEGRITY_KEY!;
     const publicKey = process.env.WOMPI_PUBLIC_KEY!;
@@ -27,7 +20,7 @@ export async function POST(request: Request) {
       .update(stringToSign)
       .digest("hex");
 
-    const response = await fetch(
+    const wompiResponse = await fetch(
       "https://production.wompi.co/v1/transactions",
       {
         method: "POST",
@@ -40,22 +33,25 @@ export async function POST(request: Request) {
           currency,
           reference,
           signature,
-          customer_email: "cliente@correo.com",
-          payment_method: { type: "CARD" },
+          customer_email: "test@viajajusto.co",
+          payment_method: {
+            type: "CARD",
+            installments: 1,
+          },
         }),
       }
     );
 
-    const data = await response.json();
+    const data = await wompiResponse.json();
 
-    if (!response.ok) {
-      console.error("WOMPI ERROR:", data);
-      return NextResponse.json(data, { status: response.status });
+    if (!wompiResponse.ok) {
+      console.error("WOMPI 422 DETAIL:", data);
+      return NextResponse.json(data, { status: wompiResponse.status });
     }
 
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
-    console.error("CREATE PAYMENT ERROR:", error);
+    console.error("SERVER ERROR:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
