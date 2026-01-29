@@ -16,15 +16,8 @@ export async function POST(request: Request) {
     }
 
     const currency = "COP";
-    const integrityKey = process.env.WOMPI_INTEGRITY_KEY;
-    const publicKey = process.env.WOMPI_PUBLIC_KEY;
-
-    if (!integrityKey || !publicKey) {
-      return NextResponse.json(
-        { error: "Wompi keys not configured" },
-        { status: 500 }
-      );
-    }
+    const integrityKey = process.env.WOMPI_INTEGRITY_KEY!;
+    const publicKey = process.env.WOMPI_PUBLIC_KEY!;
 
     const stringToSign =
       reference + amount_in_cents + currency + integrityKey;
@@ -35,12 +28,12 @@ export async function POST(request: Request) {
       .digest("hex");
 
     const response = await fetch(
-      "https://sandbox.wompi.co/v1/transactions",
+      "https://production.wompi.co/v1/transactions",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${publicKey}`, // ✅ PUBLIC KEY
+          Authorization: `Bearer ${publicKey}`,
         },
         body: JSON.stringify({
           amount_in_cents,
@@ -48,9 +41,7 @@ export async function POST(request: Request) {
           reference,
           signature,
           customer_email: "cliente@correo.com",
-          payment_method: {
-            type: "CARD",
-          },
+          payment_method: { type: "CARD" },
         }),
       }
     );
