@@ -17,10 +17,11 @@ export async function POST(request: Request) {
 
     const currency = "COP";
     const integrityKey = process.env.WOMPI_INTEGRITY_KEY;
+    const publicKey = process.env.WOMPI_PUBLIC_KEY;
 
-    if (!integrityKey) {
+    if (!integrityKey || !publicKey) {
       return NextResponse.json(
-        { error: "WOMPI_INTEGRITY_KEY not configured" },
+        { error: "Wompi keys not configured" },
         { status: 500 }
       );
     }
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.WOMPI_PRIVATE_KEY}`,
+          Authorization: `Bearer ${publicKey}`, // ✅ PUBLIC KEY
         },
         body: JSON.stringify({
           amount_in_cents,
@@ -57,6 +58,7 @@ export async function POST(request: Request) {
     const data = await response.json();
 
     if (!response.ok) {
+      console.error("WOMPI ERROR:", data);
       return NextResponse.json(data, { status: response.status });
     }
 
