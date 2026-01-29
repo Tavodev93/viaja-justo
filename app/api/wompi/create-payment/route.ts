@@ -5,8 +5,11 @@ import crypto from "crypto";
 
 export async function POST(request: Request) {
   try {
+    // 1️⃣ Leer body
     const body = await request.json();
-    const { amount_in_cents, reference } = body;
+
+    const amount_in_cents: number = body.amount_in_cents;
+    const reference: string = body.reference;
 
     if (!amount_in_cents || !reference) {
       return NextResponse.json(
@@ -15,10 +18,20 @@ export async function POST(request: Request) {
       );
     }
 
+    // 2️⃣ Variables fijas
     const currency = "COP";
-    const integrityKey = process.env.WOMPI_INTEGRITY_KEY!;
-    const privateKey = process.env.WOMPI_PRIVATE_KEY!;
 
+    const integrityKey = process.env.WOMPI_INTEGRITY_KEY;
+    const privateKey = process.env.WOMPI_PRIVATE_KEY;
+
+    if (!integrityKey || !privateKey) {
+      return NextResponse.json(
+        { error: "Wompi keys not configured" },
+        { status: 500 }
+      );
+    }
+
+    // 3️⃣ Firma
     const stringToSign =
       reference + amount_in_cents + currency + integrityKey;
 
@@ -27,17 +40,18 @@ export async function POST(request: Request) {
       .update(stringToSign)
       .digest("hex");
 
+    // 4️⃣ Crear payment link (SANDBOX)
     const wompiResponse = await fetch(
-      "https://production.wompi.co/v1/payment_links",
+      "https://sandbox.wompi.co/v1/payment_links",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${privateKey}`, // ✅ PRIVATE KEY
+          Authorization: `Bearer ${privateKey}`,
         },
         body: JSON.stringify({
-          name: "Viaja Justo – Acceso",
-          description: "Pago único Viaja Justo",
+          name: "Viaja Justo Acceso",
+          description: "Pago unico Viaja Justo",
           single_use: true,
           amount_in_cents,
           currency,
@@ -55,6 +69,7 @@ export async function POST(request: Request) {
       return NextResponse.json(data, { status: wompiResponse.status });
     }
 
+    // 5️⃣ OK
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.error("SERVER ERROR:", error);
