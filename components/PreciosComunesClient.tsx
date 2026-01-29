@@ -1,22 +1,36 @@
 "use client";
 
-import React from "react";
-
 export default function ClientePreciosComunes() {
   const crearPago = async () => {
+    console.log("👉 CLICK DETECTADO: crearPago ejecutándose");
+
     try {
+      console.log("👉 Antes del fetch");
+
       const response = await fetch("/api/wompi/create-payment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount_in_cents: 500000, // $5.000 COP
+          amount_in_cents: 500000,
           reference: "viaja-justo-001",
         }),
       });
 
-      const data = await response.json();
+      console.log("👉 Después del fetch");
+
+      const text = await response.text();
+      console.log("RAW RESPONSE:", text);
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        console.error("No es JSON válido");
+        alert("Respuesta inválida del servidor");
+        return;
+      }
 
       console.log("STATUS:", response.status);
       console.log("RESPONSE DATA:", data);
@@ -26,20 +40,19 @@ export default function ClientePreciosComunes() {
         return;
       }
 
-      // Cuando el pago se crea correctamente
-      console.log("PAGO CREADO OK", data);
+      console.log("✅ PAGO CREADO CORRECTAMENTE");
 
-      // Si luego quieres redirigir:
       // window.location.href = data.data.payment_link;
     } catch (error) {
-      console.error("FRONTEND ERROR:", error);
+      console.error("❌ ERROR FRONTEND:", error);
       alert("Error creando el pago");
     }
   };
 
   return (
-    <div>
+    <div style={{ padding: "40px" }}>
       <button
+        type="button"
         onClick={crearPago}
         style={{
           padding: "12px 20px",
@@ -48,6 +61,7 @@ export default function ClientePreciosComunes() {
           border: "none",
           borderRadius: "6px",
           cursor: "pointer",
+          fontSize: "16px",
         }}
       >
         Pagar $5.000
