@@ -17,11 +17,13 @@ export default function ClientePreciosComunes() {
       const text = await response.text();
       console.log("RAW RESPONSE:", text);
 
-      let data;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let data: any;
       try {
         data = JSON.parse(text);
       } catch {
-        console.error("Respuesta no es JSON");
+        console.error("La respuesta no es JSON válido");
+        alert("Respuesta inválida del servidor");
         return;
       }
 
@@ -33,12 +35,20 @@ export default function ClientePreciosComunes() {
         return;
       }
 
-      console.log("Respuesta completa:", data);
-console.log("data.data:", data?.data);
-console.log("payment_link:", data?.data?.payment_link);
+      // 🔑 Obtener URL real de pago (según estructura de Wompi)
+      const paymentUrl =
+        data?.data?.redirect_url ||
+        data?.data?.payment_link?.url;
 
+      if (!paymentUrl) {
+        console.error("No se recibió URL de pago", data);
+        alert("No se pudo obtener el enlace de pago");
+        return;
+      }
 
-      window.location.href = data.data.payment_link;
+      // 🚀 Redirección segura
+      window.location.href = paymentUrl;
+
     } catch (error) {
       console.error("FRONTEND ERROR:", error);
       alert("Error creando el pago");
