@@ -1,57 +1,70 @@
-export const runtime = "nodejs";
-
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import crypto from "crypto";
 
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const body = await req.json();
+    const body = await request.json();
 
-    const amountInCents = 500000; // $5.000 COP
-    const currency = "COP";
-    const reference = `viaja-justo-${Date.now()}`;
+    const { amount_in_cents, reference } = body;
 
-    const publicKey = process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY;
-    const privateKey = process.env.WOMPI_PRIVATE_KEY;
-
-    if (!publicKey || !privateKey) {
+    if (!amount_in_cents || !reference) {
       return NextResponse.json(
-        { error: "Wompi keys not configured" },
+        { error: "amount_in_cents and reference are required" },
+        { status: 400 }
+      );
+    }
+
+    const currency = "COP";
+
+    const integrityKey = process.env.WOMPI_INTEGRITY_KEY;
+
+    if (!integrityKey) {
+      return NextResponse.json(
+        { error: "WOMPI_INTEGRITY_KEY not configured" },
         { status: 500 }
       );
     }
 
-    /**
-     * Firma de integridad Wompi (SHA256)
-     * concatenación exacta requerida por Wompi:
-     * amount-in-cents + currency + reference + private_key
-     */
-    const signatureString = `${amountInCents}${currency}${reference}${privateKey}`;
+    const stringToSign =
+      reference + amount_in_cents + currency + integrityKey;
 
     const signature = crypto
       .createHash("sha256")
-      .update(signatureString)
+      .update(stringToSign)
       .digest("hex");
 
-    const redirectUrl =
-      "https://viaja-justo.vercel.app/pago-exitoso";
+    const response = await fetch(
+      "https://sandbox.wompi.co/v1/transactions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.WOMPI_PRIVATE_KEY}`,
+        },
+        body: JSON.stringify({
+          amount_in_cents,
+          currency,
+          reference,
+          signature,
+          customer_email: "cliente@correo.com",
+          payment_method: {
+            type: "CARD",
+          },
+        }),
+      }
+    );
 
-    const checkoutUrl =
-      "https://checkout.wompi.co/p/?" +
-      `public-key=${publicKey}` +
-      `&currency=${currency}` +
-      `&amount-in-cents=${amountInCents}` +
-      `&reference=${reference}` +
-      `&signature=${signature}` +
-      `&redirect-url=${encodeURIComponent(redirectUrl)}`;
+    const data = await response.json();
 
-    return NextResponse.json({
-      checkoutUrl,
-    });
+    if (!response.ok) {
+      return NextResponse.json(data, { status: response.status });
+    }
+
+    return NextResponse.json(data, { status: 200 });
   } catch (error) {
-    console.error("Error creando pago Wompi:", error);
+    console.error("CREATE PAYMENT ERROR:", error);
     return NextResponse.json(
-      { error: "Error creating payment" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
