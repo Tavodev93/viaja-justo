@@ -1,7 +1,10 @@
+export const runtime = "nodejs";
+
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
 export async function POST(request: Request) {
+  return NextResponse.json({ ok: true }, { status: 200 });
   try {
     const body = await request.json();
 
