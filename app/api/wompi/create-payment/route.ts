@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
     const currency = "COP";
     const integrityKey = process.env.WOMPI_INTEGRITY_KEY!;
-    const publicKey = process.env.WOMPI_PUBLIC_KEY!;
+    const privateKey = process.env.WOMPI_PRIVATE_KEY!;
 
     const stringToSign =
       reference + amount_in_cents + currency + integrityKey;
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${publicKey}`,
+          Authorization: `Bearer ${privateKey}`, // ✅ PRIVATE KEY
         },
         body: JSON.stringify({
           name: "Viaja Justo – Acceso",
