@@ -4,10 +4,8 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 
 export async function POST(request: Request) {
-  return NextResponse.json({ ok: true }, { status: 200 });
   try {
     const body = await request.json();
-
     const { amount_in_cents, reference } = body;
 
     if (!amount_in_cents || !reference) {
@@ -18,7 +16,6 @@ export async function POST(request: Request) {
     }
 
     const currency = "COP";
-
     const integrityKey = process.env.WOMPI_INTEGRITY_KEY;
 
     if (!integrityKey) {

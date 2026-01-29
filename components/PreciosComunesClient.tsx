@@ -2,11 +2,7 @@
 
 export default function ClientePreciosComunes() {
   const crearPago = async () => {
-    console.log("👉 CLICK DETECTADO: crearPago ejecutándose");
-
     try {
-      console.log("👉 Antes del fetch");
-
       const response = await fetch("/api/wompi/create-payment", {
         method: "POST",
         headers: {
@@ -18,33 +14,18 @@ export default function ClientePreciosComunes() {
         }),
       });
 
-      console.log("👉 Después del fetch");
-
-      const text = await response.text();
-      console.log("RAW RESPONSE:", text);
-
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        console.error("No es JSON válido");
-        alert("Respuesta inválida del servidor");
-        return;
-      }
-
-      console.log("STATUS:", response.status);
-      console.log("RESPONSE DATA:", data);
+      const data = await response.json();
 
       if (!response.ok) {
+        console.error("ERROR:", data);
         alert("Error creando el pago");
         return;
       }
 
-      console.log("✅ PAGO CREADO CORRECTAMENTE");
-
-      // window.location.href = data.data.payment_link;
+      // 🔥 REDIRECCIÓN AL CHECKOUT WOMPI
+      window.location.href = data.data.payment_link;
     } catch (error) {
-      console.error("❌ ERROR FRONTEND:", error);
+      console.error("FRONTEND ERROR:", error);
       alert("Error creando el pago");
     }
   };
