@@ -8,6 +8,13 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { amount_in_cents, reference } = body;
 
+    if (!amount_in_cents || !reference) {
+      return NextResponse.json(
+        { error: "amount_in_cents and reference are required" },
+        { status: 400 }
+      );
+    }
+
     const currency = "COP";
     const integrityKey = process.env.WOMPI_INTEGRITY_KEY!;
     const publicKey = process.env.WOMPI_PUBLIC_KEY!;
@@ -34,10 +41,7 @@ export async function POST(request: Request) {
           reference,
           signature,
           customer_email: "test@viajajusto.co",
-          payment_method: {
-            type: "CARD",
-            installments: 1,
-          },
+          redirect_url: "https://viaja-justo.vercel.app/gracias",
         }),
       }
     );
@@ -45,7 +49,7 @@ export async function POST(request: Request) {
     const data = await wompiResponse.json();
 
     if (!wompiResponse.ok) {
-      console.error("WOMPI 422 DETAIL:", data);
+      console.error("WOMPI ERROR:", data);
       return NextResponse.json(data, { status: wompiResponse.status });
     }
 
