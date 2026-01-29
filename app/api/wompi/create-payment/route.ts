@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       .digest("hex");
 
     const wompiResponse = await fetch(
-      "https://production.wompi.co/v1/transactions",
+      "https://production.wompi.co/v1/payment_links",
       {
         method: "POST",
         headers: {
@@ -36,11 +36,13 @@ export async function POST(request: Request) {
           Authorization: `Bearer ${publicKey}`,
         },
         body: JSON.stringify({
+          name: "Viaja Justo – Acceso",
+          description: "Pago único Viaja Justo",
+          single_use: true,
           amount_in_cents,
           currency,
           reference,
           signature,
-          customer_email: "test@viajajusto.co",
           redirect_url: "https://viaja-justo.vercel.app/gracias",
         }),
       }
