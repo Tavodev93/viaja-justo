@@ -1,3 +1,5 @@
+console.log("🔥 WOMPI CREATE PAYMENT HIT");
+
 export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
