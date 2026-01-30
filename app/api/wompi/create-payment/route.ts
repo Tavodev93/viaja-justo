@@ -7,13 +7,12 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     const amount_in_cents = body.amount_in_cents;
-    const reference = body.reference;
     const customer_email =
       body.customer_email || "cliente@viaja-justo.com";
 
-    if (!amount_in_cents || !reference) {
+    if (!amount_in_cents) {
       return NextResponse.json(
-        { error: "amount_in_cents and reference are required" },
+        { error: "amount_in_cents is required" },
         { status: 400 }
       );
     }
@@ -26,6 +25,9 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
+
+    // 🔑 REFERENCIA ÚNICA
+    const reference = `viaja-justo-${Date.now()}`;
 
     const wompiResponse = await fetch(
       "https://sandbox.wompi.co/v1/checkout/sessions",
@@ -47,17 +49,17 @@ export async function POST(request: Request) {
     );
 
     const data = await wompiResponse.json();
-    console.log("🧾 WOMPI FULL RESPONSE:", JSON.stringify(data));
+
+    console.log("🧾 WOMPI STATUS:", wompiResponse.status);
+    console.log("🧾 WOMPI RESPONSE:", JSON.stringify(data));
 
     if (!wompiResponse.ok) {
-      console.error("❌ WOMPI ERROR:", data);
       return NextResponse.json(data, { status: wompiResponse.status });
     }
 
     const checkout_url = data?.data?.checkout_url;
 
     if (!checkout_url) {
-      console.error("❌ No checkout URL from Wompi:", data);
       return NextResponse.json(
         { error: "No checkout URL returned by Wompi" },
         { status: 500 }
