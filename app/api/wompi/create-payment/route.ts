@@ -47,6 +47,7 @@ export async function POST(request: Request) {
     );
 
     const data = await wompiResponse.json();
+    console.log("🧾 WOMPI FULL RESPONSE:", JSON.stringify(data));
 
     if (!wompiResponse.ok) {
       console.error("❌ WOMPI ERROR:", data);
