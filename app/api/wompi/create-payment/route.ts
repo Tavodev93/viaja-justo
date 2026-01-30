@@ -3,6 +3,7 @@ export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
+  console.log("🔥 create-payment endpoint HIT");
   try {
     const body = await request.json();
 
