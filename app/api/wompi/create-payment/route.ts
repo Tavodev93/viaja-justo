@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 🔐 Firma
+    // 🔐 Firma de integridad
     const stringToSign =
       reference + amount_in_cents + currency + integrityKey;
 
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       .update(stringToSign)
       .digest("hex");
 
-    // 💳 Crear Payment Link (SANDBOX)
+    // 💳 Crear Payment Link (SANDBOX / TEST)
     const wompiResponse = await fetch(
       "https://sandbox.wompi.co/v1/payment_links",
       {
@@ -49,9 +49,9 @@ export async function POST(request: Request) {
         },
         body: JSON.stringify({
           name: "Viaja Justo Acceso",
-          description: "Pago unico Viaja Justo",
+          description: "Pago único Viaja Justo",
           single_use: true,
-          collect_shipping: false, // ✅ CLAVE DEL ERROR
+          collect_shipping: false,
           amount_in_cents,
           currency,
           reference,
@@ -64,13 +64,28 @@ export async function POST(request: Request) {
     const data = await wompiResponse.json();
 
     if (!wompiResponse.ok) {
-      console.error("WOMPI ERROR:", data);
+      console.error("❌ WOMPI ERROR:", data);
       return NextResponse.json(data, { status: wompiResponse.status });
     }
 
-    return NextResponse.json(data, { status: 200 });
+    // 🔑 ESTA ES LA URL REAL DEL CANAL DE PAGOS
+    const checkoutUrl = data?.data?.permalink;
+
+    if (!checkoutUrl) {
+      console.error("❌ No checkout URL from Wompi:", data);
+      return NextResponse.json(
+        { error: "No checkout URL returned by Wompi" },
+        { status: 500 }
+      );
+    }
+
+    // ✅ RESPUESTA LIMPIA AL FRONTEND
+    return NextResponse.json(
+      { checkout_url: checkoutUrl },
+      { status: 200 }
+    );
   } catch (error) {
-    console.error("SERVER ERROR:", error);
+    console.error("❌ SERVER ERROR:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

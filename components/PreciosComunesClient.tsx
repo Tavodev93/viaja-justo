@@ -14,41 +14,22 @@ export default function ClientePreciosComunes() {
         }),
       });
 
-      const text = await response.text();
-      console.log("RAW RESPONSE:", text);
+      const data = await response.json();
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let data: any;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        console.error("La respuesta no es JSON válido");
-        alert("Respuesta inválida del servidor");
-        return;
-      }
-
-      console.log("STATUS:", response.status);
-      console.log("RESPONSE DATA:", data);
+      console.log("RESPONSE CREATE PAYMENT:", data);
 
       if (!response.ok) {
         alert("Error creando el pago");
         return;
       }
 
-      // 🔑 Obtener URL real de pago (según estructura de Wompi)
-      const paymentUrl =
-        data?.data?.redirect_url ||
-        data?.data?.payment_link?.url;
-
-      if (!paymentUrl) {
-        console.error("No se recibió URL de pago", data);
-        alert("No se pudo obtener el enlace de pago");
+      if (!data.checkout_url) {
+        alert("No se recibió la URL del checkout");
         return;
       }
 
-      // 🚀 Redirección segura
-      window.location.href = paymentUrl;
-
+      // 🚀 REDIRECCIÓN AL CANAL DE PAGOS REAL
+      window.location.href = data.checkout_url;
     } catch (error) {
       console.error("FRONTEND ERROR:", error);
       alert("Error creando el pago");
