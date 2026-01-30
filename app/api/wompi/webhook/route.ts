@@ -1,21 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
-  const body = await req.json();
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
 
-  console.log("📩 Webhook Wompi recibido:", body);
+    console.log("🔔 WEBHOOK WOMPI RECIBIDO:");
+    console.log(JSON.stringify(body, null, 2));
 
-  const transaction = body?.data?.transaction;
-
-  if (!transaction) {
-    return NextResponse.json({ ok: false }, { status: 400 });
+    return NextResponse.json({ received: true });
+  } catch (error) {
+    console.error("❌ Error en webhook:", error);
+    return NextResponse.json(
+      { error: "Invalid webhook" },
+      { status: 400 }
+    );
   }
-
-  if (transaction.status === "APPROVED") {
-    // 👉 aquí confirmamos pago real
-    // más adelante guardaremos acceso (DB / token)
-    console.log("✅ Pago aprobado:", transaction.reference);
-  }
-
-  return NextResponse.json({ received: true });
 }
