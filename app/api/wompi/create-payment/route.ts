@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     const reference = `viaja-justo-${Date.now()}`;
 
     const wompiResponse = await fetch(
-      "https://sandbox.wompi.co/v1/checkout/sessions",
+      "https://sandbox.wompi.co/v1/checkout/session",
       {
         method: "POST",
         headers: {
