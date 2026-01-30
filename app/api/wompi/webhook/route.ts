@@ -4,25 +4,12 @@ import crypto from "crypto";
 export async function POST(req: Request) {
   try {
     const signature = req.headers.get("x-wompi-signature");
-
     if (!signature) {
-      console.error("❌ Firma no enviada");
-      return NextResponse.json(
-        { error: "Signature missing" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Signature missing" }, { status: 401 });
     }
 
     const rawBody = await req.text();
-
-    const secret = process.env.WOMPI_WEBHOOK_SECRET;
-    if (!secret) {
-      console.error("❌ WOMPI_WEBHOOK_SECRET no configurado");
-      return NextResponse.json(
-        { error: "Server misconfigured" },
-        { status: 500 }
-      );
-    }
+    const secret = process.env.WOMPI_WEBHOOK_SECRET!;
 
     const expectedSignature = crypto
       .createHmac("sha256", secret)
@@ -30,26 +17,36 @@ export async function POST(req: Request) {
       .digest("hex");
 
     if (signature !== expectedSignature) {
-      console.error("❌ Firma inválida");
-      return NextResponse.json(
-        { error: "Invalid signature" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
     const body = JSON.parse(rawBody);
+    const transaction = body?.data?.transaction;
 
-    console.log("🔔 WEBHOOK WOMPI VERIFICADO");
-    console.log(JSON.stringify(body, null, 2));
+    if (!transaction) {
+      return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    }
 
-    // ⏭️ aquí va la lógica de negocio (siguiente paso)
+    const payment = {
+      wompi_id: transaction.id,
+      reference: transaction.reference,
+      status: transaction.status,
+      amount_in_cents: transaction.amount_in_cents,
+      created_at: transaction.created_at,
+    };
+
+    console.log("💾 PAGO REGISTRADO:", payment);
+
+    // 🔓 Aquí decidimos acceso (siguiente paso)
+    if (payment.status === "APPROVED") {
+      console.log("✅ PAGO APROBADO — habilitar acceso");
+    } else {
+      console.log("⏳ PAGO NO APROBADO:", payment.status);
+    }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("❌ Error en webhook:", error);
-    return NextResponse.json(
-      { error: "Webhook error" },
-      { status: 400 }
-    );
+    console.error("Webhook error:", error);
+    return NextResponse.json({ error: "Webhook error" }, { status: 400 });
   }
 }
