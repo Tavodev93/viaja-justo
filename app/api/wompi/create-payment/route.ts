@@ -64,12 +64,12 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ checkout_url });
-  } catch (error) {
-    console.error("❌ SERVER ERROR:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+  //   return NextResponse.json({ checkout_url });
+  // } catch (error) {
+  //   console.error("❌ SERVER ERROR:", error);
+  //   return NextResponse.json(
+  //     { error: "Internal server error" },
+  //     { status: 500 }
     );
   }
 }
