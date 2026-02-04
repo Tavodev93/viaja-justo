@@ -1,30 +1,47 @@
 "use client";
 
-import { useEffect } from "react";
-import Link from "next/link";
-import { grantAccess24h } from "@/lib/access";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function PagoExitosoPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    grantAccess24h();
+    const confirmAccess = async () => {
+      try {
+        await fetch("/api/confirm-access", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ city: "cartagena" }),
+        });
+      } catch (err) {
+        console.error("Error confirmando acceso", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    confirmAccess();
   }, []);
 
-  return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white p-10 rounded-xl shadow text-center">
-        <h1 className="text-3xl font-bold mb-4">¡Listo! Ya tienes acceso 🎉</h1>
+  if (loading) {
+    return <p>Cargando acceso…</p>;
+  }
 
-        <p className="mb-6">
-          Durante las próximas 24 horas podrás consultar todos los precios
-          justos y evitar sobrecobros en tu viaje.
-        </p>
-        <Link
-          href="/"
-          className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg"
-        >
-          Volver a consultar precios
-        </Link>
-      </div>
+  return (
+    <main style={{ padding: "2rem" }}>
+      <h1>✅ Acceso activado</h1>
+      <p>
+        Ya tienes acceso completo a los precios reales de <b>Cartagena</b>.
+      </p>
+
+      <button
+        style={{ marginTop: "1rem" }}
+        onClick={() => router.push("/precio-comunes-cartagena")}
+      >
+        👉 Ver precios de Cartagena
+      </button>
     </main>
   );
 }
