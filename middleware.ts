@@ -30,5 +30,10 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/precio/:path*"],
+  matcher: [
+    "/precio-comunes-cartagena",
+    "/precio-playas-cartagena",
+    "/precio-taxi-aeropuerto-cartagena",
+    "/precio-tours-cartagena",
+  ],
 };
