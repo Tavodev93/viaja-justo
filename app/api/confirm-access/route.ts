@@ -1,24 +1,36 @@
 import { NextResponse } from "next/server";
+import crypto from "crypto";
+
+const SECRET = process.env.ACCESS_COOKIE_SECRET!;
+
+function sign(data: string) {
+  return crypto
+    .createHmac("sha256", SECRET)
+    .update(data)
+    .digest("hex");
+}
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const { city } = body;
+  const { city } = await request.json();
 
   if (!city) {
-    return NextResponse.json(
-      { error: "city is required" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "city required" }, { status: 400 });
   }
 
-  const response = NextResponse.json({ ok: true });
+  const payload = JSON.stringify({
+    cities: [city],
+    issuedAt: Date.now(),
+  });
 
-  response.cookies.set({
+  const signature = sign(payload);
+
+  const value = JSON.stringify({ payload, signature });
+
+  const res = NextResponse.json({ ok: true });
+
+  res.cookies.set({
     name: "viaja_justo_access",
-    value: JSON.stringify({
-      cities: [city],
-      createdAt: Date.now(),
-    }),
+    value,
     httpOnly: true,
     secure: true,
     sameSite: "lax",
@@ -26,5 +38,5 @@ export async function POST(request: Request) {
     maxAge: 60 * 60 * 24 * 30,
   });
 
-  return response;
+  return res;
 }
