@@ -16,8 +16,8 @@ function verifySignature(payload: string, signature: string) {
   return expected === signature;
 }
 
-export default function PrecioComunesCartagenaPage() {
-  const cookieStore = cookies();
+export default async function PrecioComunesCartagenaPage() {
+  const cookieStore = await cookies();
   const accessCookie = cookieStore.get("viaja_justo_access");
 
   let hasAccess = false;
