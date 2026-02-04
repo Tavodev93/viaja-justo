@@ -1,30 +1,30 @@
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 
-export function middleware(req: NextRequest) {
-  const accessCookie = req.cookies.get("viaja_justo_access");
-  const { pathname } = req.nextUrl;
+export async function POST(request: Request) {
+  const body = await request.json();
+  const { city } = body;
 
-  // Solo protegemos rutas de precios
-  if (pathname.startsWith("/precio")) {
-    if (!accessCookie) {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-
-    try {
-      const access = JSON.parse(accessCookie.value);
-
-      // ejemplo: proteger Cartagena
-      if (
-        pathname.includes("cartagena") &&
-        !access.cities.includes("cartagena")
-      ) {
-        return NextResponse.redirect(new URL("/", req.url));
-      }
-    } catch {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
+  if (!city) {
+    return NextResponse.json(
+      { error: "city is required" },
+      { status: 400 }
+    );
   }
 
-  return NextResponse.next();
+  const response = NextResponse.json({ ok: true });
+
+  response.cookies.set({
+    name: "viaja_justo_access",
+    value: JSON.stringify({
+      cities: [city],
+      createdAt: Date.now(),
+    }),
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 30,
+  });
+
+  return response;
 }
