@@ -1,39 +1,47 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
-export function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
-  // Solo proteger rutas de precios
-  const isPricePage =
-    pathname.startsWith("/precio-comunes") ||
-    pathname.startsWith("/precio-playas") ||
-    pathname.startsWith("/precio-taxi") ||
-    pathname.startsWith("/precio-tours");
+export async function middleware(req: NextRequest) {
+  const userEmail = req.cookies.get('user_email')?.value
 
-  if (!isPricePage) {
-    return NextResponse.next();
+  // Si no hay usuario, mandamos al paywall
+  if (!userEmail) {
+    return NextResponse.redirect(new URL('/paywall', req.url))
   }
 
-  const accessCookie = req.cookies.get("viaja_justo_access");
+  // Buscar usuario
+  const { data: user } = await supabase
+    .from('users')
+    .select('id')
+    .eq('email', userEmail)
+    .single()
 
-  if (!accessCookie) {
-    return NextResponse.redirect(new URL("/", req.url));
+  if (!user) {
+    return NextResponse.redirect(new URL('/paywall', req.url))
   }
 
-  try {
-    const access = JSON.parse(accessCookie.value);
+  // Verificar acceso activo
+  const { data: access } = await supabase
+    .from('access_passes')
+    .select('id')
+    .eq('user_id', user.id)
+    .gt('access_until', new Date().toISOString())
+    .limit(1)
 
-    if (!access.cities?.includes("cartagena")) {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-  } catch {
-    return NextResponse.redirect(new URL("/", req.url));
+  if (!access || access.length === 0) {
+    return NextResponse.redirect(new URL('/paywall', req.url))
   }
 
-  return NextResponse.next();
+  // Tiene acceso → deja pasar
+  return NextResponse.next()
 }
 
 export const config = {
-  matcher: ["/:path*"],
-};
+  matcher: ['/premium-test'],
+}
