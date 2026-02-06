@@ -8,14 +8,14 @@ const supabase = createClient(
 )
 
 export async function middleware(req: NextRequest) {
-  const userEmail = req.cookies.get('user_email')?.value
+  // Aquí asumes que ya tienes una forma real de identificar al usuario
+  // (por ahora, email llega por header o sesión; no cookies manuales)
+  const userEmail = req.headers.get('x-user-email')
 
-  // Si no hay usuario, mandamos al paywall
   if (!userEmail) {
     return NextResponse.redirect(new URL('/paywall', req.url))
   }
 
-  // Buscar usuario
   const { data: user } = await supabase
     .from('users')
     .select('id')
@@ -26,7 +26,6 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/paywall', req.url))
   }
 
-  // Verificar acceso activo
   const { data: access } = await supabase
     .from('access_passes')
     .select('id')
@@ -38,10 +37,13 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/paywall', req.url))
   }
 
-  // Tiene acceso → deja pasar
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/premium-test'],
+  matcher: [
+    '/compare/:path*',
+    '/dashboard/:path*',
+    '/api/compare/:path*',
+  ],
 }
