@@ -1,49 +1,73 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { NextRequest, NextResponse } from 'next/server'
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+const SECRET = process.env.ACCESS_COOKIE_SECRET!
 
-export async function middleware(req: NextRequest) {
-  // Aquí asumes que ya tienes una forma real de identificar al usuario
-  // (por ahora, email llega por header o sesión; no cookies manuales)
-  const userEmail = req.headers.get('x-user-email')
+function hexToUint8Array(hex: string) {
+  return new Uint8Array(
+    hex.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16))
+  )
+}
 
-  if (!userEmail) {
-    return NextResponse.redirect(new URL('/paywall', req.url))
+async function verify(payload: string, signature: string) {
+  const encoder = new TextEncoder()
+
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(SECRET),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['verify']
+  )
+
+  return crypto.subtle.verify(
+    'HMAC',
+    key,
+    hexToUint8Array(signature),
+    encoder.encode(payload)
+  )
+}
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // 🔒 RUTAS PROTEGIDAS
+  if (!pathname.startsWith('/cartagena')) {
+    return NextResponse.next()
   }
 
-  const { data: user } = await supabase
-    .from('users')
-    .select('id')
-    .eq('email', userEmail)
-    .single()
+  const cookie = request.cookies.get('viaja_justo_access')
 
-  if (!user) {
-    return NextResponse.redirect(new URL('/paywall', req.url))
+  if (!cookie) {
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
-  const { data: access } = await supabase
-    .from('access_passes')
-    .select('id')
-    .eq('user_id', user.id)
-    .gt('access_until', new Date().toISOString())
-    .limit(1)
+  try {
+    const { payload, signature } = JSON.parse(cookie.value)
 
-  if (!access || access.length === 0) {
-    return NextResponse.redirect(new URL('/paywall', req.url))
+    // 1️⃣ Verificar firma
+    const valid = await verify(payload, signature)
+    if (!valid) throw new Error('Invalid signature')
+
+    const data = JSON.parse(payload)
+    const now = Date.now()
+
+    // 2️⃣ Verificar expiración real
+    if (data.expiresAt && now > data.expiresAt) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+
+    // 3️⃣ Verificar ciudad
+    if (!data.cities?.includes('cartagena')) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+
+    // ✅ Todo OK → acceso permitido
+    return NextResponse.next()
+  } catch {
+    return NextResponse.redirect(new URL('/', request.url))
   }
-
-  return NextResponse.next()
 }
 
 export const config = {
-  matcher: [
-    '/compare/:path*',
-    '/dashboard/:path*',
-    '/api/compare/:path*',
-  ],
+  matcher: ['/cartagena/:path*'],
 }

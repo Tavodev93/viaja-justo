@@ -7,14 +7,8 @@ const client = new MercadoPagoConfig({
 
 const BASE_URL = 'https://viaja-justo.vercel.app'
 
-export async function POST(req: Request) {
+export async function POST() {
   try {
-    const { email } = await req.json()
-
-    if (!email) {
-      return NextResponse.json({ error: 'Email requerido' }, { status: 400 })
-    }
-
     const preference = new Preference(client)
 
     const result = await preference.create({
@@ -28,7 +22,6 @@ export async function POST(req: Request) {
             id: ''
           },
         ],
-        payer: { email },
         back_urls: {
           success: `${BASE_URL}/pago-exitoso`,
           failure: `${BASE_URL}/pago-fallido`,
@@ -40,7 +33,7 @@ export async function POST(req: Request) {
     })
 
     return NextResponse.json({
-      checkoutUrl: result.init_point,
+      init_point: result.init_point,
     })
   } catch (error) {
     console.error('CREATE PAYMENT ERROR:', error)

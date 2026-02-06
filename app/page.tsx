@@ -1,135 +1,271 @@
-import CategoryCard from "../components/CategoryCard";
+"use client";
 
-export default function Home() {
+import Link from "next/link";
+
+export default function Hero() {
   return (
-    <main className="min-h-screen text-gray-800">
+    <>
       {/* HERO */}
-      <section className="bg-gradient-to-b from-blue-600 via-sky-500 to-cyan-400 text-white py-24 px-6 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold mb-6">
-          ¿Te están cobrando de más en Cartagena?
-        </h1>
+      <section className="relative bg-gradient-to-b from-[#0f172a] to-[#020617] text-white">
+        <div className="max-w-7xl mx-auto px-6 py-24 text-center">
+          <div className="inline-block mb-6 rounded-full bg-green-600/10 px-4 py-1 text-sm text-green-400 border border-green-500/20">
+            Precios reales verificados en Cartagena
+          </div>
 
-        <p className="text-lg md:text-xl mb-10 max-w-2xl mx-auto">
-          Consulta precios justos antes de pagar taxis, playas y tours. Evita
-          abusos y viaja con tranquilidad.
-        </p>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">
+            Evita precios inflados para turistas.
+            <br />
+            <span className="text-green-400">
+              Paga como local, no como visitante.
+            </span>
+          </h1>
 
-        <button className="bg-yellow-400 text-black font-semibold px-10 py-4 rounded-xl text-lg hover:bg-yellow-300 transition shadow-lg">
-          Ver precios justos ahora
-        </button>
+          <p className="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-slate-300">
+            Compara precios reales de comida, transporte y servicios en
+            Cartagena. Acceso completo por{" "}
+            <strong className="text-white">24 horas</strong> pagando solo
+            <strong className="text-green-400"> $5.000 COP</strong>.
+          </p>
 
-        <p className="mt-6 text-sm opacity-90">
-          Acceso por 24 horas · Sin registro · Pago único de $5.000 COP
-        </p>
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              onClick={async () => {
+                const res = await fetch("/api/create-payment", {
+                  method: "POST",
+                });
 
-        <p className="mt-2 text-xs opacity-80">
-          Menos que una cerveza · Te ahorra más de lo que cuesta
-        </p>
-      </section>
+                const data = await res.json();
 
-      {/* BENEFICIOS */}
-      {/* BENEFICIOS */}
-      <section className="py-20 px-6 bg-sky-50">
-        <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-12 text-sky-900">
-            Lo que obtienes con Viaja Justo
-          </h2>
+                if (data?.init_point) {
+                  window.location.href = data.init_point;
+                }
+              }}
+              className="inline-flex items-center justify-center rounded-xl bg-green-500 px-8 py-4 text-lg font-semibold text-black hover:bg-green-400 transition"
+            >
+              Acceder a precios reales por 24 horas
+            </button>
+          </div>
 
-          <ul className="grid gap-6 grid-cols-1 sm:grid-cols-2 max-w-3xl mx-auto text-left">
-            <li className="flex items-start gap-3 bg-white p-6 rounded-xl shadow-md text-gray-800">
-              <span className="text-green-500 text-xl">✅</span>
-              <span>Rangos de precios reales usados por turistas</span>
-            </li>
-
-            <li className="flex items-start gap-3 bg-white p-6 rounded-xl shadow-md text-gray-800">
-              <span className="text-green-500 text-xl">✅</span>
-              <span>Referencias claras para negociar sin miedo</span>
-            </li>
-
-            <li className="flex items-start gap-3 bg-white p-6 rounded-xl shadow-md text-gray-800">
-              <span className="text-green-500 text-xl">✅</span>
-              <span>Acceso por 24 horas a todos los precios</span>
-            </li>
-
-            <li className="flex items-start gap-3 bg-white p-6 rounded-xl shadow-md text-gray-800">
-              <span className="text-green-500 text-xl">✅</span>
-              <span>Sin crear cuenta, sin correos, sin spam</span>
-            </li>
-          </ul>
-
-          <p className="mt-10 text-sm text-sky-700">
-            Proyecto independiente · Información basada en experiencias reales
+          <p className="mt-6 text-sm text-slate-400">
+            Sin suscripciones · Pago único · Acceso inmediato
           </p>
         </div>
       </section>
-
-      {/* CATEGORÍAS */}
-      <section className="py-20 px-6 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            ¿Qué precio quieres consultar?
-          </h2>
-
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            <CategoryCard
-              title="Taxi aeropuerto"
-              description="Evita cobros inflados al llegar."
-              href="/precio-taxi-aeropuerto-cartagena"
-            />
-
-            <CategoryCard
-              title="Playas"
-              description="Paga lo justo por sillas y carpas."
-              href="/precio-playas-cartagena"
-            />
-
-            <CategoryCard
-              title="Tours"
-              description="No más precios “especial turista”."
-              href="/precio-tours-cartagena"
-            />
-
-            <CategoryCard
-              title="Precios comunes"
-              description="Agua, cerveza y básicos sin sorpresas."
-              href="/precio-comunes-cartagena"
-            />
+      {/* SECCIÓN COMPARACIÓN DE PRECIOS */}
+      <section className="bg-[#020617] text-white py-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-extrabold">
+              ¿Cuánto te pueden cobrar de más en un solo día?
+            </h2>
+            <p className="mt-4 text-slate-400 max-w-2xl mx-auto">
+              Esto es lo que muchos turistas pagan sin saberlo en Cartagena.
+            </p>
           </div>
-        </div>
-      </section>
 
-      {/* BLOQUE FINAL — PROPÓSITO + APORTE */}
-      <section className="py-24 px-6 bg-gradient-to-b from-amber-200 via-orange-200 to-yellow-100">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-10 text-orange-900">
-            ¿Por qué existe Viaja Justo?
-          </h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="rounded-2xl border border-white/10 p-6 bg-white/5">
+              <h3 className="font-semibold text-lg mb-4">🍽️ Almuerzo típico</h3>
+              <p className="text-red-400 text-xl font-bold">Turista: $45.000</p>
+              <p className="text-green-400 text-xl font-bold mt-1">
+                Local: $18.000
+              </p>
+              <p className="mt-3 text-sm text-slate-400">
+                Mismo plato, distinto precio.
+              </p>
+            </div>
 
-          <ul className="space-y-4 text-lg text-orange-900 mb-16">
-            <li>💸 Falta de referencias claras de precios</li>
-            <li>😕 Turistas pagando de más sin saberlo</li>
-            <li>🧭 Información dispersa o inexistente</li>
-          </ul>
+            <div className="rounded-2xl border border-white/10 p-6 bg-white/5">
+              <h3 className="font-semibold text-lg mb-4">🚕 Trayecto corto</h3>
+              <p className="text-red-400 text-xl font-bold">Turista: $25.000</p>
+              <p className="text-green-400 text-xl font-bold mt-1">
+                Local: $10.000
+              </p>
+              <p className="mt-3 text-sm text-slate-400">
+                Sin taxímetro, sin referencia.
+              </p>
+            </div>
 
-          <div className="bg-white rounded-2xl shadow-xl p-10">
-            <h3 className="text-2xl font-bold mb-6 text-gray-800">
-              ¿Para qué sirve tu aporte de $5.000?
-            </h3>
+            <div className="rounded-2xl border border-white/10 p-6 bg-white/5">
+              <h3 className="font-semibold text-lg mb-4">
+                🏖️ Servicio turístico
+              </h3>
+              <p className="text-red-400 text-xl font-bold">Turista: $80.000</p>
+              <p className="text-green-400 text-xl font-bold mt-1">
+                Local: $35.000
+              </p>
+              <p className="mt-3 text-sm text-slate-400">
+                Precio cambia al oír el acento.
+              </p>
+            </div>
+          </div>
 
-            <ul className="space-y-3 text-lg text-gray-700 mb-6">
-              <li>📊 Mantener la plataforma activa</li>
-              <li>🧾 Recopilar y actualizar precios reales</li>
-              <li>📍 Crear guías claras por zonas</li>
-              <li>🌎 Expandir el proyecto a más ciudades</li>
-            </ul>
+          <div className="mt-16 text-center">
+            <p className="text-lg text-slate-300">
+              Con solo <strong className="text-green-400">$5.000 COP</strong>{" "}
+              evitas perder
+              <strong className="text-white"> decenas de miles</strong> en un
+              día.
+            </p>
 
-            <p className="text-sm text-gray-500">
-              No es una suscripción. No es una donación eterna. Es un aporte
-              único para construir algo útil.
+            <div className="mt-8">
+              <button
+                onClick={async () => {
+                  const res = await fetch("/api/create-payment", {
+                    method: "POST",
+                  });
+
+                  const data = await res.json();
+
+                  if (data?.init_point) {
+                    window.location.href = data.init_point;
+                  }
+                }}
+                className="inline-flex items-center justify-center rounded-xl bg-green-500 px-8 py-4 text-lg font-semibold text-black hover:bg-green-400 transition"
+              >
+                Acceder a precios reales por 24 horas
+              </button>
+            </div>
+
+            <p className="mt-4 text-sm text-slate-400">
+              Pago único · Acceso inmediato · Sin registros innecesarios
             </p>
           </div>
         </div>
       </section>
-    </main>
+      {/* SECCIÓN CÓMO FUNCIONA */}
+      <section className="bg-[#020617] text-white py-20 border-t border-white/5">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-extrabold">
+              ¿Cómo funciona Viaja Justo?
+            </h2>
+            <p className="mt-4 text-slate-400">
+              Tres pasos simples. Sin registros largos. Sin complicaciones.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center p-6 rounded-2xl border border-white/10 bg-white/5">
+              <div className="text-green-400 text-4xl font-extrabold mb-4">
+                1
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Paga $5.000 COP</h3>
+              <p className="text-slate-400">
+                Un solo pago para acceder durante 24 horas completas.
+              </p>
+            </div>
+
+            <div className="text-center p-6 rounded-2xl border border-white/10 bg-white/5">
+              <div className="text-green-400 text-4xl font-extrabold mb-4">
+                2
+              </div>
+              <h3 className="text-xl font-semibold mb-2">
+                Desbloquea los precios
+              </h3>
+              <p className="text-slate-400">
+                Consulta precios reales de comida, transporte y servicios.
+              </p>
+            </div>
+
+            <div className="text-center p-6 rounded-2xl border border-white/10 bg-white/5">
+              <div className="text-green-400 text-4xl font-extrabold mb-4">
+                3
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Paga como local</h3>
+              <p className="text-slate-400">
+                Evita cobros inflados y decide con información real.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-14 text-center">
+            <button
+              onClick={async () => {
+                const res = await fetch("/api/create-payment", {
+                  method: "POST",
+                });
+
+                const data = await res.json();
+
+                if (data?.init_point) {
+                  window.location.href = data.init_point;
+                }
+              }}
+              className="inline-flex items-center justify-center rounded-xl bg-green-500 px-8 py-4 text-lg font-semibold text-black hover:bg-green-400 transition"
+            >
+              Acceder a precios reales por 24 horas
+            </button>
+            <p className="mt-4 text-sm text-slate-400">
+              Acceso inmediato · Pago único · Sin suscripciones
+            </p>
+          </div>
+        </div>
+      </section>
+      ;{/* SECCIÓN FAQ */}
+      <section className="bg-[#020617] text-white py-20 border-t border-white/5">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-extrabold">
+              Preguntas frecuentes
+            </h2>
+            <p className="mt-4 text-slate-400">
+              Resolvemos las dudas más comunes antes de pagar.
+            </p>
+          </div>
+
+          <div className="space-y-8">
+            <div>
+              <h3 className="font-semibold text-lg">¿El pago es seguro?</h3>
+              <p className="mt-2 text-slate-400">
+                Sí. Usamos plataformas de pago confiables y no almacenamos datos
+                bancarios.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-lg">
+                ¿Esto es una suscripción?
+              </h3>
+              <p className="mt-2 text-slate-400">
+                No. Es un pago único de $5.000 COP. No hay cobros automáticos ni
+                renovaciones.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-lg">
+                ¿Qué incluye el acceso por 24 horas?
+              </h3>
+              <p className="mt-2 text-slate-400">
+                Acceso completo a precios reales de comida, transporte y
+                servicios turísticos en Cartagena durante 24 horas.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-lg">
+                ¿Puedo consultar los precios varias veces?
+              </h3>
+              <p className="mt-2 text-slate-400">
+                Sí. Durante las 24 horas puedes consultar los precios cuantas
+                veces quieras.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-lg">
+                ¿Funciona solo en Cartagena?
+              </h3>
+              <p className="mt-2 text-slate-400">
+                Por ahora sí. Preferimos calidad y datos confiables antes de
+                abrir nuevas ciudades.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      ;
+    </>
   );
 }
