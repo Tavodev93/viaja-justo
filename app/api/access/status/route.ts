@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 import { verifyAccess } from "@/lib/accessToken"
 
 export async function GET() {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const token = cookieStore.get("viajajusto_access")
 
   if (!token) {

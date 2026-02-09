@@ -1,11 +1,11 @@
-import crypto from "crypto"
+import { createHmac } from "crypto"
 
 const SECRET = process.env.ACCESS_COOKIE_SECRET!
 
 export function signAccess(expiresAt: number) {
   const payload = expiresAt.toString()
-  const signature = crypto
-    .createHmac("sha256", SECRET)
+
+  const signature = createHmac("sha256", SECRET)
     .update(payload)
     .digest("hex")
 
@@ -13,17 +13,19 @@ export function signAccess(expiresAt: number) {
 }
 
 export function verifyAccess(token: string) {
-  const [payload, signature] = token.split(".")
-  if (!payload || !signature) return null
+  const parts = token.split(".")
+  if (parts.length !== 2) return null
 
-  const expected = crypto
-    .createHmac("sha256", SECRET)
+  const [payload, signature] = parts
+
+  const expectedSignature = createHmac("sha256", SECRET)
     .update(payload)
     .digest("hex")
 
-  if (expected !== signature) return null
+  if (expectedSignature !== signature) return null
 
   const expiresAt = Number(payload)
+  if (Number.isNaN(expiresAt)) return null
   if (Date.now() > expiresAt) return null
 
   return expiresAt
