@@ -23,21 +23,17 @@ export async function POST() {
           },
         ],
         back_urls: {
-          success: `${process.env.NEXT_PUBLIC_BASE_URL}/cartagena`,
+          success: `${process.env.NEXT_PUBLIC_BASE_URL}/return`,
           failure: `${process.env.NEXT_PUBLIC_BASE_URL}/paywall?error=payment`,
         },
         auto_return: "approved",
+        notification_url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/mp/webhook`,
       },
     })
 
-    return NextResponse.json({
-      init_point: result.init_point,
-    })
-  } catch (error) {
-    console.error("MercadoPago error:", error)
-    return NextResponse.json(
-      { error: "Error creando preferencia" },
-      { status: 500 }
-    )
+    return NextResponse.json({ init_point: result.init_point })
+  } catch (e) {
+    console.error(e)
+    return NextResponse.json({ error: "MP error" }, { status: 500 })
   }
 }

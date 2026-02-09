@@ -8,10 +8,10 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/paywall", req.url))
   }
 
-  const valid = verifyAccess(token.value)
-
-  if (!valid) {
-    const res = NextResponse.redirect(new URL("/paywall?expired=1", req.url))
+  if (!verifyAccess(token.value)) {
+    const res = NextResponse.redirect(
+      new URL("/paywall?expired=1", req.url)
+    )
     res.cookies.delete("viajajusto_access")
     return res
   }
