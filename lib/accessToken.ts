@@ -1,3 +1,5 @@
+export const runtime = "nodejs"
+
 import { createHmac } from "crypto"
 
 const SECRET = process.env.ACCESS_COOKIE_SECRET!
