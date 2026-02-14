@@ -44,7 +44,7 @@ export default function InternetColombia() {
 
           <div className="mt-8 text-center">
             <a
-              href="https://airalo.pxf.io/gRP5m2"
+              href="https://airalo.pxf.io/c/6981865/2071037/15608"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-green-500 hover:bg-green-400 text-black font-semibold px-8 py-4 rounded-lg text-lg"

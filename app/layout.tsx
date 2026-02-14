@@ -1,4 +1,6 @@
 import "./globals.css";
+import Analytics from "@/components/Analytics"
+
 
 export default function RootLayout({
   children,
@@ -9,6 +11,7 @@ export default function RootLayout({
     <html lang="es">
       <body>
         {children}
+        <Analytics />
       </body>
     </html>
   );
